@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav style="background: var(--blue); padding: 15px; color: white; display: flex; justify-content: space-between;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img src="logo.jpg" height="40"> <h3>EPITRACKER</h3>
+        </div>
+        <input type="text" placeholder="Rechercher...">
+        <button onclick="logout()">Déconnexion</button>
+    </nav>
+
+    <div class="main-content" style="padding: 30px;">
+        <h2>Mes Documents</h2>
+        <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+        <button onclick="uploadDocument()" style="background: var(--orange); color:white; border:none; padding:10px;">Télécharger</button>
+        
+        <div id="fileList" style="margin-top:20px;">
+            </div>
+    </div>
+</body>
+</html>
