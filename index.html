@@ -1,49 +1,89 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Epitracker - Connexion</title>
-    <style>
-        :root { --blue: #2c3e50; --orange: #ff8c00; --white: #ffffff; }
-        body { background: var(--blue); font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .card { background: var(--white); padding: 40px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-        button { background: var(--orange); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EpiData Portal | Professional Storage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="card">
-        <img src="logo.jpg" width="80" alt="Logo">
-        <h2>Connexion</h2>
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="pass" placeholder="Mot de passe">
-        <button onclick="login()">Se connecter</button>
-        <p>Pas de compte? <a href="register.html">S'inscrire</a></p>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <header class="lg:hidden bg-blue-700 text-white p-4 flex justify-between items-center shadow-md">
+        <h1 class="text-xl font-bold">EpiData</h1>
+        <button id="menuBtn"><i class="fas fa-bars text-2xl"></i></button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 lg:relative transition duration-200 ease-in-out z-50 w-64 bg-slate-900 text-white p-6 space-y-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <i class="fas fa-microscope text-blue-400 text-3xl"></i>
+                <span class="text-2xl font-bold tracking-tight">EpiData</span>
+            </div>
+            <nav>
+                <ul class="space-y-4">
+                    <li><a href="#" class="block p-3 rounded bg-blue-600 hover:bg-blue-500 transition"><i class="fas fa-chart-line mr-3"></i>Dashboard</a></li>
+                    <li><a href="#" class="block p-3 rounded hover:bg-slate-800 transition"><i class="fas fa-file-medical mr-3"></i>Patient Logs</a></li>
+                    <li><a href="#" class="block p-3 rounded hover:bg-slate-800 transition"><i class="fas fa-shield-halved mr-3"></i>Security</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-4 lg:p-10 overflow-x-hidden">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl font-bold text-slate-900 mb-8">Epidemiological Data Entry</h2>
+                
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-10">
+                    <form id="dataForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Patient ID</label>
+                            <input type="text" id="patientId" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Condition/Disease</label>
+                            <input type="text" id="disease" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Date of Onset</label>
+                            <input type="date" id="date" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold mb-2">Location</label>
+                            <input type="text" id="location" required class="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div class="md:col-span-2 lg:col-span-4">
+                            <button type="submit" class="bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg transition duration-200 w-full md:w-auto">
+                                <i class="fas fa-save mr-2"></i> Save Record
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                        <h3 class="font-bold text-lg">Stored Records</h3>
+                        <span id="recordCount" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">0 Records</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">Patient ID</th>
+                                    <th class="px-6 py-4">Disease</th>
+                                    <th class="px-6 py-4">Onset Date</th>
+                                    <th class="px-6 py-4">Location</th>
+                                    <th class="px-6 py-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTable" class="divide-y divide-slate-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
-<script>
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAqprXPydINdg2QSdO4X4zhg_reE8IN2fE",
-  authDomain: "epitracker-1fbaf.firebaseapp.com",
-  projectId: "epitracker-1fbaf",
-  storageBucket: "epitracker-1fbaf.firebasestorage.app",
-  messagingSenderId: "952444552767",
-  appId: "1:952444552767:web:92288ef4d04fe9d7129a8a",
-  measurementId: "G-4VNXBGVE46"
-};  
-  const firebaseConfig = {
-    apiKey: "AIzaSy...",
-    authDomain: "epitracker-..." ,
-    projectId: "epitracker-...",
-    storageBucket: "epitracker-...",
-    messagingSenderId: "...",
-    appId: "..."
-  };
-
-  // Then initialize it:
-  firebase.initializeApp(firebaseConfig);
-  // Now you can start using auth and firestore!
-</script>
-
