@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Epitracker - Connexion</title>
+    <style>
+        :root { --blue: #2c3e50; --orange: #ff8c00; --white: #ffffff; }
+        body { background: var(--blue); font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .card { background: var(--white); padding: 40px; border-radius: 20px; width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        button { background: var(--orange); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="logo.jpg" width="80" alt="Logo">
+        <h2>Connexion</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="pass" placeholder="Mot de passe">
+        <button onclick="login()">Se connecter</button>
+        <p>Pas de compte? <a href="register.html">S'inscrire</a></p>
+    </div>
+</body>
+</html>
