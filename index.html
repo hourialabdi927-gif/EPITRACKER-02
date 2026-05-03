@@ -307,7 +307,7 @@
       `).join('');
     }
 
-    // Fixed search input Handler
+    // Fixed search handler that checks for individual words anywhere in the text
     function searchReports() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       
@@ -316,10 +316,27 @@
         return;
       }
 
+      // Split query into individual words
+      const searchKeywords = query.split(/\s+/).filter(word => word.length > 0);
+
       const filtered = reports.filter(item => {
-        const reportTitle = (item.title || "").toLowerCase();
-        const doctorName = (item.doctorName || "").toLowerCase();
-        return reportTitle.includes(query) || doctorName.includes(query);
+        // Clean text and remove accents for flexibility
+        const normalizeText = (text) => {
+          return (text || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+        };
+
+        const reportTitle = normalizeText(item.title);
+        const doctorName = normalizeText(item.doctorName);
+        const combinedText = `${reportTitle} ${doctorName}`;
+
+        // Ensure every typed search word matches something in the report
+        return searchKeywords.every(keyword => {
+          const normalizedKeyword = normalizeText(keyword);
+          return combinedText.includes(normalizedKeyword);
+        });
       });
 
       renderReports(filtered);
