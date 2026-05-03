@@ -307,13 +307,21 @@
       `).join('');
     }
 
-    // Search input Handler
+    // Fixed search input Handler
     function searchReports() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      const filtered = reports.filter(item => 
-        item.title.toLowerCase().includes(query) || 
-        item.doctorName.toLowerCase().includes(query)
-      );
+      
+      if (query === "") {
+        renderReports(reports);
+        return;
+      }
+
+      const filtered = reports.filter(item => {
+        const reportTitle = (item.title || "").toLowerCase();
+        const doctorName = (item.doctorName || "").toLowerCase();
+        return reportTitle.includes(query) || doctorName.includes(query);
+      });
+
       renderReports(filtered);
     }
   </script>
