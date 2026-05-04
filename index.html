@@ -73,7 +73,6 @@
           id="searchInput" 
           placeholder="Search by report type, keyword, or doctor name..." 
           class="flex-1 p-3 text-base md:text-lg focus:outline-none bg-transparent"
-          onkeyup="searchReports()"
         />
       </div>
     </div>
@@ -147,6 +146,14 @@
       updateUI();
       renderDoctors();
       renderReports(reports);
+
+      // Add a bulletproof input listener that catches text on any device
+      const searchBox = document.getElementById('searchInput');
+      if (searchBox) {
+        ['input', 'keyup', 'change'].forEach(evt => {
+          searchBox.addEventListener(evt, searchReports);
+        });
+      }
     };
 
     // Mobile Sidebar controls
@@ -307,7 +314,7 @@
       `).join('');
     }
 
-    // Fixed search handler that checks for individual words anywhere in the text
+    // Comprehensive search handler
     function searchReports() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       
@@ -316,11 +323,11 @@
         return;
       }
 
-      // Split query into individual words
+      // Split query into individual keywords
       const searchKeywords = query.split(/\s+/).filter(word => word.length > 0);
 
       const filtered = reports.filter(item => {
-        // Clean text and remove accents for flexibility
+        // Formats text to clear accents (such as matching e with é)
         const normalizeText = (text) => {
           return (text || "")
             .toLowerCase()
@@ -332,7 +339,7 @@
         const doctorName = normalizeText(item.doctorName);
         const combinedText = `${reportTitle} ${doctorName}`;
 
-        // Ensure every typed search word matches something in the report
+        // Match all terms in typed sequence
         return searchKeywords.every(keyword => {
           const normalizedKeyword = normalizeText(keyword);
           return combinedText.includes(normalizedKeyword);
