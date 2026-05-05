@@ -3,211 +3,170 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Medical Reports Hub</title>
+  <title>DocHub - Global Network</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
 
-  <div class="bg-blue-800 text-white p-4 flex justify-between items-center md:hidden w-full shadow-md">
-    <h1 class="text-xl font-bold"><i class="fa-solid fa-notes-medical mr-2"></i>DocHub</h1>
-    <button id="mobileMenuBtn" class="text-2xl focus:outline-none">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-  </div>
-
-  <aside id="sidebar" class="bg-white border-r border-gray-200 w-full md:w-80 flex-shrink-0 flex flex-col h-full absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 shadow-lg md:shadow-none">
+  <aside id="sidebar" class="bg-white border-r border-gray-200 w-full md:w-80 flex flex-col h-full absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 shadow-lg md:shadow-none">
     <div class="p-6 border-b border-gray-100 flex justify-between items-center">
       <div>
         <h2 class="text-2xl font-extrabold text-blue-900 tracking-tight">DocHub</h2>
-        <p class="text-xs text-gray-500">Medical Report Directory</p>
+        <p class="text-xs text-gray-500">Global Shared Directory</p>
       </div>
-      <button id="closeMobileMenuBtn" class="text-gray-500 text-xl md:hidden">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
     </div>
 
     <div class="p-4 border-b border-gray-100 bg-blue-50">
-      <div id="authSection" class="space-y-3">
-        <div id="loggedOutView" class="space-y-2">
-          <p class="text-sm text-blue-800 font-medium">Doctor Access</p>
-          <button onclick="toggleAuthModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg shadow-sm transition">
-            <i class="fa-solid fa-user-md mr-1"></i> Log In / Register
-          </button>
-        </div>
-        <div id="loggedInView" class="hidden space-y-2">
-          <p class="text-sm text-gray-700">Dr. <span id="currentDoctorName" class="font-bold">...</span></p>
-          <button onclick="toggleUploadModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 px-4 rounded-lg shadow-sm transition">
-            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload New Report
-          </button>
-          <button onclick="logout()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2 px-4 rounded-lg mt-1">Logout</button>
-        </div>
+      <div id="loggedInView" class="hidden space-y-2">
+        <p class="text-sm text-gray-700 font-medium">Dr. <span id="currentDoctorName" class="font-bold text-blue-900">...</span></p>
+        <button onclick="toggleUploadModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm transition">
+          <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload New Report
+        </button>
+        <button onclick="logout()" class="w-full text-xs text-gray-400 mt-2 hover:text-gray-600">Logout</button>
       </div>
-    </div>
-
-    <div class="p-4 flex-1 overflow-y-auto">
-      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Community Doctors</h3>
-      <ul id="doctorsList" class="space-y-2"></ul>
+      <button id="loggedOutView" onclick="toggleAuthModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow-sm transition">
+        <i class="fa-solid fa-user-md mr-1"></i> Doctor Login
+      </button>
     </div>
   </aside>
 
-  <div id="sidebarOverlay" class="fixed inset-0 bg-black opacity-50 z-20 hidden md:hidden"></div>
-
   <main class="flex-1 flex flex-col h-full overflow-y-auto p-4 md:p-8">
-    <div class="max-w-4xl mx-auto w-full mb-8">
-      <div class="text-center mb-6">
-        <h1 class="text-3xl md:text-4xl font-black text-gray-900 mb-2">Search All Reports</h1>
-        <p class="text-gray-600 text-base">Access reports shared by all doctors in the network.</p>
-      </div>
+    <div class="max-w-4xl mx-auto w-full mb-8 text-center">
+      <h1 class="text-3xl md:text-4xl font-black text-gray-900 mb-2">Search All Reports</h1>
+      <p class="text-gray-600 mb-6">Access documents shared by the entire medical network.</p>
 
       <div class="space-y-3">
-        <div class="relative bg-white p-2 rounded-xl border border-gray-200 flex items-center gap-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
+        <div class="relative bg-white p-2 rounded-xl border border-gray-200 flex items-center shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
           <i class="fa-solid fa-search text-gray-400 ml-3"></i>
-          <input type="text" id="searchInput" placeholder="Search by keyword or doctor..." class="flex-1 p-3 text-base focus:outline-none bg-transparent" />
+          <input type="text" id="searchInput" placeholder="Search by cancer type, doctor, or keyword..." class="flex-1 p-3 text-base focus:outline-none bg-transparent" />
         </div>
-        <button onclick="searchReports()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-2">
+        
+        <button onclick="fetchReports()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
           <i class="fa-solid fa-magnifying-glass"></i> Search Now (GO)
         </button>
       </div>
     </div>
 
-    <div class="max-w-4xl mx-auto w-full flex-1">
-      <h3 id="resultsCount" class="text-sm font-semibold text-gray-500 mb-4">All Reports</h3>
-      <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    <div class="max-w-4xl mx-auto w-full">
+      <h3 id="resultsCount" class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">Reports Directory</h3>
+      <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        </div>
     </div>
   </main>
 
   <div id="authModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
-      <h3 class="text-xl font-extrabold text-blue-900 mb-4">Doctor Registration</h3>
-      <form onsubmit="registerDoctor(event)" class="space-y-4">
-        <input type="text" id="regName" required placeholder="Full Name" class="w-full p-2.5 border rounded-lg">
-        <input type="email" id="regEmail" required placeholder="Email Address" class="w-full p-2.5 border rounded-lg">
-        <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg">Create Account</button>
-        <button type="button" onclick="toggleAuthModal()" class="w-full text-gray-500 text-sm">Cancel</button>
-      </form>
+    <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-2xl">
+      <h3 class="font-bold text-xl mb-4 text-blue-900">Doctor Registration</h3>
+      <input type="text" id="regName" placeholder="Full Name (e.g. Dr. Ahmed)" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+      <button onclick="register()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold shadow-lg">Enter Hub</button>
     </div>
   </div>
 
   <div id="uploadModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-      <h3 class="text-xl font-extrabold text-emerald-900 mb-4">Share Report URL</h3>
-      <form onsubmit="uploadReport(event)" class="space-y-4">
-        <input type="text" id="reportTitle" required placeholder="Report Title (e.g. MRI Scan)" class="w-full p-2.5 border rounded-lg">
-        <input type="url" id="driveUrl" required placeholder="Google Drive URL" class="w-full p-2.5 border rounded-lg">
-        <button type="submit" class="w-full bg-emerald-600 text-white font-semibold py-2.5 rounded-lg">Publish to Directory</button>
-        <button type="button" onclick="toggleUploadModal()" class="w-full text-gray-500 text-sm">Cancel</button>
-      </form>
+    <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+      <h3 class="font-bold text-xl mb-4 text-emerald-800">Share Report Link</h3>
+      <input type="text" id="reportTitle" placeholder="Report Title (e.g. Cancer Registry 2024)" class="w-full p-3 border rounded-lg mb-3">
+      <input type="url" id="driveUrl" placeholder="Google Drive URL" class="w-full p-3 border rounded-lg mb-4">
+      <button onclick="saveToCloud()" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold shadow-lg">Publish to Network</button>
+      <button onclick="toggleUploadModal()" class="w-full text-gray-400 mt-2 text-sm">Cancel</button>
     </div>
   </div>
 
   <script>
-    // SHARED DIRECTORY SIMULATION
-    // This uses localStorage, but we treat it as a GLOBAL directory.
-    let doctors = JSON.parse(localStorage.getItem('global_doctors')) || [];
-    let reports = JSON.parse(localStorage.getItem('global_reports')) || [];
-    let loggedInDoctor = JSON.parse(localStorage.getItem('docHub_session')) || null;
+    // --- SUPABASE CONFIGURATION ---
+    const SUPABASE_URL = 'https://your-project-id.supabase.co'; // REPLACE THIS
+    const SUPABASE_KEY = 'your-anon-key'; // REPLACE THIS
+    const supabase = lib.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    window.onload = function() {
-      updateUI();
-      renderDoctors();
-      renderReports(reports);
-      document.getElementById('searchInput').addEventListener('keyup', (e) => { if (e.key === 'Enter') searchReports(); });
+    let loggedInDoctor = JSON.parse(localStorage.getItem('docHub_session'));
+
+    window.onload = () => {
+      if(loggedInDoctor) {
+        document.getElementById('loggedInView').classList.remove('hidden');
+        document.getElementById('loggedOutView').classList.add('hidden');
+        document.getElementById('currentDoctorName').innerText = loggedInDoctor.name;
+      }
+      fetchReports();
     };
 
-    function updateUI() {
-      const loggedInView = document.getElementById('loggedInView');
-      const loggedOutView = document.getElementById('loggedOutView');
-      if (loggedInDoctor) {
-        loggedInView.classList.remove('hidden');
-        loggedOutView.classList.add('hidden');
-        document.getElementById('currentDoctorName').innerText = loggedInDoctor.name;
-      } else {
-        loggedInView.classList.add('hidden');
-        loggedOutView.classList.remove('hidden');
-      }
-    }
-
-    function registerDoctor(e) {
-      e.preventDefault();
-      const name = document.getElementById('regName').value.trim();
-      const email = document.getElementById('regEmail').value.trim();
-      let doc = doctors.find(d => d.email === email);
-      if (!doc) {
-        doc = { id: Date.now().toString(), name, email };
-        doctors.push(doc);
-        localStorage.setItem('global_doctors', JSON.stringify(doctors));
-      }
-      loggedInDoctor = doc;
-      localStorage.setItem('docHub_session', JSON.stringify(loggedInDoctor));
-      updateUI();
-      renderDoctors();
-      toggleAuthModal();
-    }
-
-    function logout() {
-      loggedInDoctor = null;
-      localStorage.removeItem('docHub_session');
-      updateUI();
-    }
-
-    function uploadReport(e) {
-      e.preventDefault();
-      const newReport = {
-        id: Date.now().toString(),
-        doctorId: loggedInDoctor.id,
-        doctorName: loggedInDoctor.name,
-        title: document.getElementById('reportTitle').value.trim(),
-        driveUrl: document.getElementById('driveUrl').value.trim(),
-        date: new Date().toLocaleDateString()
-      };
-      reports.unshift(newReport);
-      localStorage.setItem('global_reports', JSON.stringify(reports));
-      renderReports(reports);
-      toggleUploadModal();
-      document.getElementById('uploadForm').reset();
-    }
-
-    function renderDoctors() {
-      const list = document.getElementById('doctorsList');
-      list.innerHTML = doctors.length ? doctors.map(d => `
-        <li class="bg-white border border-gray-100 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-          <div class="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs font-bold">${d.name.substring(0,2).toUpperCase()}</div>
-          <span class="text-sm font-bold text-gray-800">${d.name}</span>
-        </li>
-      `).join('') : '<li class="text-xs text-gray-400">No doctors yet</li>';
-    }
-
-    function renderReports(data) {
-      const grid = document.getElementById('reportsGrid');
-      document.getElementById('resultsCount').innerText = `${data.length} Global Report(s)`;
-      grid.innerHTML = data.length ? data.map(r => `
-        <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:border-blue-300 transition">
-          <h3 class="text-lg font-extrabold text-gray-900">${r.title}</h3>
-          <p class="text-sm text-gray-500">Shared by Dr. ${r.doctorName}</p>
-          <a href="${r.driveUrl}" target="_blank" class="mt-4 block text-center bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">View Google Drive Report</a>
-        </div>
-      `).join('') : '<div class="col-span-full text-center py-10 text-gray-400">No matching reports in the directory.</div>';
-    }
-
-    function searchReports() {
+    // SEARCH NOW (GO) Logic
+    async function fetchReports() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (!query) return renderReports(reports);
-      const keywords = query.split(/\s+/);
-      const filtered = reports.filter(r => {
-        const text = `${r.title} ${r.doctorName}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return keywords.every(kw => text.includes(kw.normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
-      });
-      renderReports(filtered);
+      const countLabel = document.getElementById('resultsCount');
+      countLabel.innerText = "Syncing with cloud...";
+
+      // Pull from the 'reports' table you created in Supabase
+      let { data, error } = await supabase
+        .from('reports')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Connection error:", error);
+        return;
+      }
+
+      // Filter by keywords
+      if (query) {
+        const keywords = query.split(/\s+/);
+        data = data.filter(r => {
+          const text = `${r.title} ${r.doctor_name}`.toLowerCase();
+          return keywords.every(kw => text.includes(kw));
+        });
+      }
+
+      render(data || []);
     }
 
+    async function saveToCloud() {
+      const title = document.getElementById('reportTitle').value.trim();
+      const url = document.getElementById('driveUrl').value.trim();
+      
+      if(!title || !url) return alert("Fill all fields");
+
+      const { error } = await supabase.from('reports').insert([{ 
+        title: title, 
+        drive_url: url, 
+        doctor_name: loggedInDoctor.name 
+      }]);
+
+      if (!error) {
+        alert("Published Successfully!");
+        toggleUploadModal();
+        fetchReports();
+      }
+    }
+
+    function render(data) {
+      const grid = document.getElementById('reportsGrid');
+      document.getElementById('resultsCount').innerText = `${data.length} Global Report(s) Found`;
+      
+      grid.innerHTML = data.length ? data.map(r => `
+        <div class="bg-white border-2 border-gray-100 p-5 rounded-2xl shadow-sm hover:border-blue-400 transition group">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-700">${r.title}</h3>
+            <span class="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded uppercase">Public</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-4">Uploaded by Dr. ${r.doctor_name}</p>
+          <a href="${r.drive_url}" target="_blank" class="block w-full text-center bg-blue-50 text-blue-700 font-bold py-2 rounded-xl hover:bg-blue-600 hover:text-white transition">
+            <i class="fa-brands fa-google-drive mr-2"></i>View in Google Drive
+          </a>
+        </div>
+      `).join('') : '<div class="col-span-full text-center py-10 text-gray-400 border-2 border-dashed rounded-2xl">No matching reports found in the global cloud.</div>';
+    }
+
+    // UI Helpers
+    function register() {
+      const name = document.getElementById('regName').value;
+      if(!name) return;
+      localStorage.setItem('docHub_session', JSON.stringify({name}));
+      location.reload();
+    }
+    function logout() { localStorage.removeItem('docHub_session'); location.reload(); }
     function toggleAuthModal() { document.getElementById('authModal').classList.toggle('hidden'); }
     function toggleUploadModal() { document.getElementById('uploadModal').classList.toggle('hidden'); }
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); });
-    document.getElementById('closeMobileMenuBtn').addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); });
-    overlay.addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); });
   </script>
 </body>
 </html>
