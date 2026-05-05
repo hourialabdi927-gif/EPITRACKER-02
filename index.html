@@ -17,7 +17,6 @@
   </div>
 
   <aside id="sidebar" class="bg-white border-r border-gray-200 w-full md:w-80 flex-shrink-0 flex flex-col h-full absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out z-30 shadow-lg md:shadow-none">
-    
     <div class="p-6 border-b border-gray-100 flex justify-between items-center">
       <div>
         <h2 class="text-2xl font-extrabold text-blue-900 tracking-tight">DocHub</h2>
@@ -31,165 +30,101 @@
     <div class="p-4 border-b border-gray-100 bg-blue-50">
       <div id="authSection" class="space-y-3">
         <div id="loggedOutView" class="space-y-2">
-          <p class="text-sm text-blue-800 font-medium">Are you a doctor?</p>
+          <p class="text-sm text-blue-800 font-medium">Doctor Access</p>
           <button onclick="toggleAuthModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg shadow-sm transition">
-            <i class="fa-solid fa-user-md mr-1"></i> Doctor Log In / Register
+            <i class="fa-solid fa-user-md mr-1"></i> Log In / Register
           </button>
         </div>
         <div id="loggedInView" class="hidden space-y-2">
-          <p class="text-sm text-gray-700">Welcome, Dr. <span id="currentDoctorName" class="font-bold">...</span></p>
+          <p class="text-sm text-gray-700">Dr. <span id="currentDoctorName" class="font-bold">...</span></p>
           <button onclick="toggleUploadModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 px-4 rounded-lg shadow-sm transition">
-            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload Google Drive URL
+            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Upload New Report
           </button>
-          <button onclick="logout()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2 px-4 rounded-lg transition mt-1">
-            Logout
-          </button>
+          <button onclick="logout()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold py-2 px-4 rounded-lg mt-1">Logout</button>
         </div>
       </div>
     </div>
 
     <div class="p-4 flex-1 overflow-y-auto">
-      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Registered Doctors</h3>
-      <ul id="doctorsList" class="space-y-2">
-        <li class="text-sm text-gray-500 italic p-3">No doctors registered yet.</li>
-      </ul>
+      <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Community Doctors</h3>
+      <ul id="doctorsList" class="space-y-2"></ul>
     </div>
   </aside>
 
   <div id="sidebarOverlay" class="fixed inset-0 bg-black opacity-50 z-20 hidden md:hidden"></div>
 
   <main class="flex-1 flex flex-col h-full overflow-y-auto p-4 md:p-8">
-    
     <div class="max-w-4xl mx-auto w-full mb-8">
       <div class="text-center mb-6">
-        <h1 class="text-3xl md:text-4xl font-black text-gray-900 mb-2">Search Medical Reports</h1>
-        <p class="text-gray-600 text-base md:text-lg">Find documents instantly via secure Google Drive links.</p>
+        <h1 class="text-3xl md:text-4xl font-black text-gray-900 mb-2">Search All Reports</h1>
+        <p class="text-gray-600 text-base">Access reports shared by all doctors in the network.</p>
       </div>
 
       <div class="space-y-3">
-        <div class="relative bg-white p-2 rounded-xl border border-gray-200 flex items-center gap-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+        <div class="relative bg-white p-2 rounded-xl border border-gray-200 flex items-center gap-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500">
           <i class="fa-solid fa-search text-gray-400 ml-3"></i>
-          <input 
-            type="text" 
-            id="searchInput" 
-            placeholder="Search by report type, keyword, or doctor name..." 
-            class="flex-1 p-3 text-base md:text-lg focus:outline-none bg-transparent"
-          />
+          <input type="text" id="searchInput" placeholder="Search by keyword or doctor..." class="flex-1 p-3 text-base focus:outline-none bg-transparent" />
         </div>
-        <button 
-          onclick="searchReports()" 
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2"
-        >
+        <button onclick="searchReports()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md flex items-center justify-center gap-2">
           <i class="fa-solid fa-magnifying-glass"></i> Search Now (GO)
         </button>
       </div>
     </div>
 
     <div class="max-w-4xl mx-auto w-full flex-1">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="resultsCount" class="text-sm font-semibold text-gray-500">All Reports</h3>
-      </div>
-
-      <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="col-span-full text-center py-12 text-gray-400 bg-white border border-gray-200 rounded-xl shadow-sm">
-          <i class="fa-solid fa-file-invoice text-4xl mb-2 text-gray-300"></i>
-          <p>No reports uploaded yet.</p>
-        </div>
-      </div>
+      <h3 id="resultsCount" class="text-sm font-semibold text-gray-500 mb-4">All Reports</h3>
+      <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
     </div>
   </main>
 
   <div id="authModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 relative">
-      <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
+    <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6">
       <h3 class="text-xl font-extrabold text-blue-900 mb-4">Doctor Registration</h3>
-      <form id="authForm" onsubmit="registerDoctor(event)" class="space-y-4">
-        <div>
-          <label class="block text-sm font-bold text-gray-700 mb-1">Your Full Name</label>
-          <input type="text" id="regName" required placeholder="Dr. John Doe" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-bold text-gray-700 mb-1">Email Address</label>
-          <input type="email" id="regEmail" required placeholder="doctor@hospital.com" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-        </div>
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition">
-          Create Account
-        </button>
+      <form onsubmit="registerDoctor(event)" class="space-y-4">
+        <input type="text" id="regName" required placeholder="Full Name" class="w-full p-2.5 border rounded-lg">
+        <input type="email" id="regEmail" required placeholder="Email Address" class="w-full p-2.5 border rounded-lg">
+        <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-lg">Create Account</button>
+        <button type="button" onclick="toggleAuthModal()" class="w-full text-gray-500 text-sm">Cancel</button>
       </form>
     </div>
   </div>
 
   <div id="uploadModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 relative">
-      <button onclick="toggleUploadModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-        <i class="fa-solid fa-xmark text-xl"></i>
-      </button>
-      <h3 class="text-xl font-extrabold text-emerald-900 mb-4">Submit New Report URL</h3>
-      <form id="uploadForm" onsubmit="uploadReport(event)" class="space-y-4">
-        <div>
-          <label class="block text-sm font-bold text-gray-700 mb-1">Report Title / Type</label>
-          <input type="text" id="reportTitle" required placeholder="e.g., Chest X-Ray, Blood Test" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-sm font-bold text-gray-700 mb-1">Google Drive Link</label>
-          <input type="url" id="driveUrl" required placeholder="https://drive.google.com/file/d/..." class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-        </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg shadow-sm transition">
-          Publish Report
-        </button>
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-extrabold text-emerald-900 mb-4">Share Report URL</h3>
+      <form onsubmit="uploadReport(event)" class="space-y-4">
+        <input type="text" id="reportTitle" required placeholder="Report Title (e.g. MRI Scan)" class="w-full p-2.5 border rounded-lg">
+        <input type="url" id="driveUrl" required placeholder="Google Drive URL" class="w-full p-2.5 border rounded-lg">
+        <button type="submit" class="w-full bg-emerald-600 text-white font-semibold py-2.5 rounded-lg">Publish to Directory</button>
+        <button type="button" onclick="toggleUploadModal()" class="w-full text-gray-500 text-sm">Cancel</button>
       </form>
     </div>
   </div>
 
   <script>
-    let doctors = JSON.parse(localStorage.getItem('docHub_doctors')) || [];
-    let reports = JSON.parse(localStorage.getItem('docHub_reports')) || [];
+    // SHARED DIRECTORY SIMULATION
+    // This uses localStorage, but we treat it as a GLOBAL directory.
+    let doctors = JSON.parse(localStorage.getItem('global_doctors')) || [];
+    let reports = JSON.parse(localStorage.getItem('global_reports')) || [];
     let loggedInDoctor = JSON.parse(localStorage.getItem('docHub_session')) || null;
 
     window.onload = function() {
       updateUI();
       renderDoctors();
       renderReports(reports);
-
-      const searchBox = document.getElementById('searchInput');
-      if (searchBox) {
-        searchBox.addEventListener('keyup', (e) => {
-          if (e.key === 'Enter') searchReports();
-        });
-      }
+      document.getElementById('searchInput').addEventListener('keyup', (e) => { if (e.key === 'Enter') searchReports(); });
     };
 
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-
-    function openMobileMenu() {
-      sidebar.classList.remove('-translate-x-full');
-      overlay.classList.remove('hidden');
-    }
-    function closeMobileMenu() {
-      sidebar.classList.add('-translate-x-full');
-      overlay.classList.add('hidden');
-    }
-    document.getElementById('mobileMenuBtn').addEventListener('click', openMobileMenu);
-    document.getElementById('closeMobileMenuBtn').addEventListener('click', closeMobileMenu);
-    overlay.addEventListener('click', closeMobileMenu);
-
-    function toggleAuthModal() { document.getElementById('authModal').classList.toggle('hidden'); }
-    function toggleUploadModal() { document.getElementById('uploadModal').classList.toggle('hidden'); }
-
     function updateUI() {
-      const loggedOutView = document.getElementById('loggedOutView');
       const loggedInView = document.getElementById('loggedInView');
-      const docNameSpan = document.getElementById('currentDoctorName');
+      const loggedOutView = document.getElementById('loggedOutView');
       if (loggedInDoctor) {
-        loggedOutView.classList.add('hidden');
         loggedInView.classList.remove('hidden');
-        docNameSpan.innerText = loggedInDoctor.name;
+        loggedOutView.classList.add('hidden');
+        document.getElementById('currentDoctorName').innerText = loggedInDoctor.name;
       } else {
-        loggedOutView.classList.remove('hidden');
         loggedInView.classList.add('hidden');
+        loggedOutView.classList.remove('hidden');
       }
     }
 
@@ -197,15 +132,13 @@
       e.preventDefault();
       const name = document.getElementById('regName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
-      const existingDoc = doctors.find(d => d.email === email);
-      if (existingDoc) {
-        loggedInDoctor = existingDoc;
-      } else {
-        const newDoctor = { id: Date.now().toString(), name, email };
-        doctors.push(newDoctor);
-        localStorage.setItem('docHub_doctors', JSON.stringify(doctors));
-        loggedInDoctor = newDoctor;
+      let doc = doctors.find(d => d.email === email);
+      if (!doc) {
+        doc = { id: Date.now().toString(), name, email };
+        doctors.push(doc);
+        localStorage.setItem('global_doctors', JSON.stringify(doctors));
       }
+      loggedInDoctor = doc;
       localStorage.setItem('docHub_session', JSON.stringify(loggedInDoctor));
       updateUI();
       renderDoctors();
@@ -220,74 +153,61 @@
 
     function uploadReport(e) {
       e.preventDefault();
-      const title = document.getElementById('reportTitle').value.trim();
-      const driveUrl = document.getElementById('driveUrl').value.trim();
       const newReport = {
         id: Date.now().toString(),
         doctorId: loggedInDoctor.id,
         doctorName: loggedInDoctor.name,
-        title,
-        driveUrl,
+        title: document.getElementById('reportTitle').value.trim(),
+        driveUrl: document.getElementById('driveUrl').value.trim(),
         date: new Date().toLocaleDateString()
       };
       reports.unshift(newReport);
-      localStorage.setItem('docHub_reports', JSON.stringify(reports));
+      localStorage.setItem('global_reports', JSON.stringify(reports));
       renderReports(reports);
       toggleUploadModal();
       document.getElementById('uploadForm').reset();
     }
 
     function renderDoctors() {
-      const listContainer = document.getElementById('doctorsList');
-      if (doctors.length === 0) {
-        listContainer.innerHTML = `<li class="text-sm text-gray-500 italic p-3">No doctors yet.</li>`;
-        return;
-      }
-      listContainer.innerHTML = doctors.map(doc => `
+      const list = document.getElementById('doctorsList');
+      list.innerHTML = doctors.length ? doctors.map(d => `
         <li class="bg-white border border-gray-100 p-3 rounded-xl flex items-center gap-3 shadow-sm">
-          <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold uppercase">
-            ${doc.name.substring(0, 2)}
-          </div>
-          <div><h4 class="text-sm font-bold text-gray-800">${doc.name}</h4></div>
+          <div class="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xs font-bold">${d.name.substring(0,2).toUpperCase()}</div>
+          <span class="text-sm font-bold text-gray-800">${d.name}</span>
         </li>
-      `).join('');
+      `).join('') : '<li class="text-xs text-gray-400">No doctors yet</li>';
     }
 
-    function renderReports(itemsToRender) {
-      const reportsContainer = document.getElementById('reportsGrid');
-      const countLabel = document.getElementById('resultsCount');
-      countLabel.innerText = `${itemsToRender.length} Report(s) available`;
-      if (itemsToRender.length === 0) {
-        reportsContainer.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">No reports found.</div>`;
-        return;
-      }
-      reportsContainer.innerHTML = itemsToRender.map(item => `
-        <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 class="text-lg font-extrabold text-gray-900">${item.title}</h3>
-            <p class="text-sm text-gray-600">Dr. ${item.doctorName}</p>
-          </div>
-          <a href="${item.driveUrl}" target="_blank" class="mt-4 block text-center bg-blue-50 text-blue-800 py-2 rounded-lg font-bold">Open Drive</a>
+    function renderReports(data) {
+      const grid = document.getElementById('reportsGrid');
+      document.getElementById('resultsCount').innerText = `${data.length} Global Report(s)`;
+      grid.innerHTML = data.length ? data.map(r => `
+        <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:border-blue-300 transition">
+          <h3 class="text-lg font-extrabold text-gray-900">${r.title}</h3>
+          <p class="text-sm text-gray-500">Shared by Dr. ${r.doctorName}</p>
+          <a href="${r.driveUrl}" target="_blank" class="mt-4 block text-center bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">View Google Drive Report</a>
         </div>
-      `).join('');
+      `).join('') : '<div class="col-span-full text-center py-10 text-gray-400">No matching reports in the directory.</div>';
     }
 
-    // Fixed Robust Search Function
     function searchReports() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (query === "") {
-        renderReports(reports);
-        return;
-      }
-
-      const keywords = query.split(/\s+/).filter(k => k.length > 0);
-      const filtered = reports.filter(item => {
-        const normalize = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const content = normalize(`${item.title} ${item.doctorName}`);
-        return keywords.every(kw => content.includes(normalize(kw)));
+      if (!query) return renderReports(reports);
+      const keywords = query.split(/\s+/);
+      const filtered = reports.filter(r => {
+        const text = `${r.title} ${r.doctorName}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        return keywords.every(kw => text.includes(kw.normalize("NFD").replace(/[\u0300-\u036f]/g, "")));
       });
       renderReports(filtered);
     }
+
+    function toggleAuthModal() { document.getElementById('authModal').classList.toggle('hidden'); }
+    function toggleUploadModal() { document.getElementById('uploadModal').classList.toggle('hidden'); }
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); });
+    document.getElementById('closeMobileMenuBtn').addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); });
+    overlay.addEventListener('click', () => { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); });
   </script>
 </body>
 </html>
