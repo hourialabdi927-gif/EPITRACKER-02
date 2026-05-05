@@ -66,14 +66,22 @@
         <p class="text-gray-600 text-base md:text-lg">Find documents instantly via secure Google Drive links.</p>
       </div>
 
-      <div class="relative bg-white p-2 rounded-xl border border-gray-200 flex items-center gap-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
-        <i class="fa-solid fa-search text-gray-400 ml-3"></i>
-        <input 
-          type="text" 
-          id="searchInput" 
-          placeholder="Search by report type, keyword, or doctor name..." 
-          class="flex-1 p-3 text-base md:text-lg focus:outline-none bg-transparent"
-        />
+      <div class="space-y-3">
+        <div class="relative bg-white p-2 rounded-xl border border-gray-200 flex items-center gap-2 shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+          <i class="fa-solid fa-search text-gray-400 ml-3"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search by report type, keyword, or doctor name..." 
+            class="flex-1 p-3 text-base md:text-lg focus:outline-none bg-transparent"
+          />
+        </div>
+        <button 
+          onclick="searchReports()" 
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-magnifying-glass"></i> Search Now (GO)
+        </button>
       </div>
     </div>
 
@@ -136,29 +144,23 @@
   </div>
 
   <script>
-    // Mock Backend Database (Stored in browser LocalStorage for immediate use)
     let doctors = JSON.parse(localStorage.getItem('docHub_doctors')) || [];
     let reports = JSON.parse(localStorage.getItem('docHub_reports')) || [];
     let loggedInDoctor = JSON.parse(localStorage.getItem('docHub_session')) || null;
 
-    // Load static UI data on start
     window.onload = function() {
       updateUI();
       renderDoctors();
       renderReports(reports);
 
-      // Add a bulletproof input listener that catches text on any device
       const searchBox = document.getElementById('searchInput');
       if (searchBox) {
-        ['input', 'keyup', 'change'].forEach(evt => {
-          searchBox.addEventListener(evt, searchReports);
+        searchBox.addEventListener('keyup', (e) => {
+          if (e.key === 'Enter') searchReports();
         });
       }
     };
 
-    // Mobile Sidebar controls
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const closeMobileMenuBtn = document.getElementById('closeMobileMenuBtn');
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
 
@@ -166,33 +168,21 @@
       sidebar.classList.remove('-translate-x-full');
       overlay.classList.remove('hidden');
     }
-
     function closeMobileMenu() {
       sidebar.classList.add('-translate-x-full');
       overlay.classList.add('hidden');
     }
-
-    mobileMenuBtn.addEventListener('click', openMobileMenu);
-    closeMobileMenuBtn.addEventListener('click', closeMobileMenu);
+    document.getElementById('mobileMenuBtn').addEventListener('click', openMobileMenu);
+    document.getElementById('closeMobileMenuBtn').addEventListener('click', closeMobileMenu);
     overlay.addEventListener('click', closeMobileMenu);
 
-    // Modal Toggles
-    function toggleAuthModal() {
-      const modal = document.getElementById('authModal');
-      modal.classList.toggle('hidden');
-    }
+    function toggleAuthModal() { document.getElementById('authModal').classList.toggle('hidden'); }
+    function toggleUploadModal() { document.getElementById('uploadModal').classList.toggle('hidden'); }
 
-    function toggleUploadModal() {
-      const modal = document.getElementById('uploadModal');
-      modal.classList.toggle('hidden');
-    }
-
-    // Auth State Controller
     function updateUI() {
       const loggedOutView = document.getElementById('loggedOutView');
       const loggedInView = document.getElementById('loggedInView');
       const docNameSpan = document.getElementById('currentDoctorName');
-
       if (loggedInDoctor) {
         loggedOutView.classList.add('hidden');
         loggedInView.classList.remove('hidden');
@@ -203,13 +193,10 @@
       }
     }
 
-    // Register Account
     function registerDoctor(e) {
       e.preventDefault();
       const name = document.getElementById('regName').value.trim();
       const email = document.getElementById('regEmail').value.trim();
-
-      // Simple unique email validation
       const existingDoc = doctors.find(d => d.email === email);
       if (existingDoc) {
         loggedInDoctor = existingDoc;
@@ -219,29 +206,22 @@
         localStorage.setItem('docHub_doctors', JSON.stringify(doctors));
         loggedInDoctor = newDoctor;
       }
-
       localStorage.setItem('docHub_session', JSON.stringify(loggedInDoctor));
       updateUI();
       renderDoctors();
       toggleAuthModal();
-      document.getElementById('authForm').reset();
     }
 
-    // Logout Account
     function logout() {
       loggedInDoctor = null;
       localStorage.removeItem('docHub_session');
       updateUI();
     }
 
-    // Upload a new report
     function uploadReport(e) {
       e.preventDefault();
-      if (!loggedInDoctor) return alert('Error: Please log in first');
-
       const title = document.getElementById('reportTitle').value.trim();
       const driveUrl = document.getElementById('driveUrl').value.trim();
-
       const newReport = {
         id: Date.now().toString(),
         doctorId: loggedInDoctor.id,
@@ -250,102 +230,62 @@
         driveUrl,
         date: new Date().toLocaleDateString()
       };
-
       reports.unshift(newReport);
       localStorage.setItem('docHub_reports', JSON.stringify(reports));
-
       renderReports(reports);
       toggleUploadModal();
       document.getElementById('uploadForm').reset();
     }
 
-    // Render Side Panel List of Doctors
     function renderDoctors() {
       const listContainer = document.getElementById('doctorsList');
       if (doctors.length === 0) {
-        listContainer.innerHTML = `<li class="text-sm text-gray-500 italic p-3">No doctors registered yet.</li>`;
+        listContainer.innerHTML = `<li class="text-sm text-gray-500 italic p-3">No doctors yet.</li>`;
         return;
       }
-
       listContainer.innerHTML = doctors.map(doc => `
-        <li class="bg-white border border-gray-100 p-3 rounded-xl flex items-center gap-3 shadow-sm hover:border-blue-200 transition">
+        <li class="bg-white border border-gray-100 p-3 rounded-xl flex items-center gap-3 shadow-sm">
           <div class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold uppercase">
             ${doc.name.substring(0, 2)}
           </div>
-          <div class="overflow-hidden">
-            <h4 class="text-sm font-bold text-gray-800 truncate">${doc.name}</h4>
-            <p class="text-xs text-gray-500 truncate">${doc.email}</p>
-          </div>
+          <div><h4 class="text-sm font-bold text-gray-800">${doc.name}</h4></div>
         </li>
       `).join('');
     }
 
-    // Render Search Results Grid
     function renderReports(itemsToRender) {
       const reportsContainer = document.getElementById('reportsGrid');
       const countLabel = document.getElementById('resultsCount');
-
       countLabel.innerText = `${itemsToRender.length} Report(s) available`;
-
       if (itemsToRender.length === 0) {
-        reportsContainer.innerHTML = `
-          <div class="col-span-full text-center py-12 text-gray-400 bg-white border border-gray-200 rounded-xl shadow-sm">
-            <i class="fa-solid fa-file-circle-exclamation text-4xl mb-2 text-gray-300"></i>
-            <p>No reports match your parameters.</p>
-          </div>
-        `;
+        reportsContainer.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">No reports found.</div>`;
         return;
       }
-
       reportsContainer.innerHTML = itemsToRender.map(item => `
-        <div class="bg-white border border-gray-200 p-5 rounded-xl flex flex-col justify-between shadow-sm hover:shadow-md hover:border-blue-300 transition gap-4">
+        <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm flex flex-col justify-between">
           <div>
-            <div class="flex items-start justify-between">
-              <span class="text-xs bg-blue-50 text-blue-800 font-bold px-2.5 py-1 rounded-md tracking-wide uppercase">Report</span>
-              <span class="text-xs text-gray-400"><i class="fa-solid fa-calendar mr-1"></i> ${item.date}</span>
-            </div>
-            <h3 class="text-lg font-extrabold text-gray-900 mt-3 truncate">${item.title}</h3>
-            <p class="text-sm text-gray-600 mt-1"><i class="fa-solid fa-user-md mr-1 text-blue-500"></i> Added by ${item.doctorName}</p>
+            <h3 class="text-lg font-extrabold text-gray-900">${item.title}</h3>
+            <p class="text-sm text-gray-600">Dr. ${item.doctorName}</p>
           </div>
-          <a href="${item.driveUrl}" target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-800 font-semibold py-2.5 px-4 rounded-lg text-sm transition">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Google Drive
-          </a>
+          <a href="${item.driveUrl}" target="_blank" class="mt-4 block text-center bg-blue-50 text-blue-800 py-2 rounded-lg font-bold">Open Drive</a>
         </div>
       `).join('');
     }
 
-    // Comprehensive search handler
+    // Fixed Robust Search Function
     function searchReports() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      
       if (query === "") {
         renderReports(reports);
         return;
       }
 
-      // Split query into individual keywords
-      const searchKeywords = query.split(/\s+/).filter(word => word.length > 0);
-
+      const keywords = query.split(/\s+/).filter(k => k.length > 0);
       const filtered = reports.filter(item => {
-        // Formats text to clear accents (such as matching e with é)
-        const normalizeText = (text) => {
-          return (text || "")
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-        };
-
-        const reportTitle = normalizeText(item.title);
-        const doctorName = normalizeText(item.doctorName);
-        const combinedText = `${reportTitle} ${doctorName}`;
-
-        // Match all terms in typed sequence
-        return searchKeywords.every(keyword => {
-          const normalizedKeyword = normalizeText(keyword);
-          return combinedText.includes(normalizedKeyword);
-        });
+        const normalize = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const content = normalize(`${item.title} ${item.doctorName}`);
+        return keywords.every(kw => content.includes(normalize(kw)));
       });
-
       renderReports(filtered);
     }
   </script>
