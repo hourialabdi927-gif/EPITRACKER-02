@@ -3,121 +3,143 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DocHub - Global Medical Network</title>
+  <title>DocHub - Global Network</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Layout styling to ensure sidebar and main content cooperate */
-    body { display: flex; min-height: 100vh; overflow-x: hidden; margin: 0; }
-    
+    /* Prevent the whole body from scrolling so the sidebar stays put */
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden; 
+    }
+
+    /* Flex container for the whole page */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Sidebar sizing */
     #sidebar { 
       width: 320px; 
       min-width: 320px; 
-      height: 100vh; 
-      position: sticky; 
-      top: 0; 
+      height: 100%; 
       background: white; 
       border-right: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
       transition: transform 0.3s ease;
-      z-index: 40;
+      z-index: 100;
     }
 
+    /* Main content area gets the scrollbar */
     main { 
-      flex-grow: 1; 
-      min-width: 0; 
-      background: #f9fafb; 
-      padding-bottom: 50px;
+      flex: 1;
+      height: 100%;
+      overflow-y: auto; 
+      background: #f9fafb;
+      -webkit-overflow-scrolling: touch;
     }
 
-    /* Mobile Sidebar Handling */
+    /* Mobile behavior: Hide sidebar off-screen */
     @media (max-width: 768px) {
       #sidebar {
         position: fixed;
+        left: 0;
+        top: 0;
         transform: translateX(-100%);
       }
       #sidebar.open {
         transform: translateX(0);
       }
+      .overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 90;
+      }
+      .overlay.active { display: block; }
     }
   </style>
 </head>
-<body class="font-sans">
+<body>
 
-  <button onclick="toggleSidebar()" class="md:hidden fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-50">
-    <i class="fa-solid fa-bars"></i>
-  </button>
+  <div class="app-container">
+    <div id="sidebarOverlay" class="overlay" onclick="toggleSidebar()"></div>
 
-  <aside id="sidebar" class="flex flex-col shadow-sm">
-    <div class="p-8 border-b border-gray-100">
-      <h2 class="text-3xl font-black text-blue-900 tracking-tighter">DocHub</h2>
-      <p class="text-xs text-blue-500 font-bold uppercase tracking-widest mt-1">Directory Platform</p>
-    </div>
+    <aside id="sidebar">
+      <div class="p-8 border-b border-gray-100">
+        <h2 class="text-3xl font-black text-blue-900">DocHub</h2>
+        <p class="text-xs text-blue-500 font-bold uppercase mt-1">Directory Platform</p>
+      </div>
 
-    <div class="p-6 bg-blue-50/50 flex-1">
-      <div id="loggedInView" class="hidden space-y-4">
-        <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-sm">
-          <p class="text-xs text-gray-400 font-bold uppercase mb-1">Authenticated Doctor</p>
-          <p class="text-lg font-bold text-blue-900 italic">Dr. <span id="currentDoctorName"></span></p>
+      <div class="p-6 bg-blue-50/30 flex-1">
+        <div id="loggedInView" class="hidden space-y-4">
+          <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-sm">
+            <p class="text-xs text-gray-400 font-bold uppercase mb-1">Authenticated Doctor</p>
+            <p class="text-lg font-bold text-blue-900 italic">Dr. <span id="currentDoctorName"></span></p>
+          </div>
+          <button onclick="toggleUploadModal()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Share New Report
+          </button>
+          <button onclick="logout()" class="w-full text-xs text-gray-400 font-bold mt-4">LOGOUT SESSION</button>
         </div>
-        
-        <button onclick="toggleUploadModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up"></i> Share New Report
-        </button>
 
-        <button onclick="logout()" class="w-full text-xs text-gray-400 hover:text-red-500 font-bold transition-colors">
-          <i class="fa-solid fa-power-off mr-1"></i> LOGOUT SESSION
-        </button>
-      </div>
-
-      <div id="loggedOutView" class="space-y-4">
-        <button onclick="toggleAuthModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
-          <i class="fa-solid fa-user-md"></i> DOCTOR LOGIN
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <main class="p-6 md:p-16">
-    <div class="max-w-4xl mx-auto w-full">
-      <div class="text-center mb-12">
-        <h1 class="text-5xl font-black text-gray-900 mb-4 tracking-tight">Search All Reports</h1>
-        <p class="text-xl text-gray-500">Access documents shared by doctors across the global cloud network.</p>
-      </div>
-
-      <div class="bg-white p-8 rounded-3xl shadow-2xl border border-gray-100 space-y-4 mb-12">
-        <div class="relative">
-          <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
-          <input type="text" id="searchInput" placeholder="Search by cancer type, keyword, or doctor name..." 
-                 class="w-full pl-14 pr-6 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-blue-500 focus:bg-white outline-none transition-all text-lg font-medium">
+        <div id="loggedOutView" class="space-y-4">
+          <button onclick="toggleAuthModal()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg transition active:scale-95">
+            <i class="fa-solid fa-user-md"></i> DOCTOR LOGIN
+          </button>
         </div>
-        
-        <button onclick="fetchReports()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 text-xl uppercase tracking-tighter">
-          Search Now (GO)
-        </button>
+      </div>
+    </aside>
+
+    <main>
+      <div class="md:hidden p-4 bg-white border-b flex justify-between items-center">
+        <span class="font-black text-blue-900">DocHub</span>
+        <button onclick="toggleSidebar()" class="text-blue-600 text-xl"><i class="fa-solid fa-bars"></i></button>
       </div>
 
-      <div class="space-y-6">
-        <div class="flex items-center gap-4 border-b border-gray-200 pb-6">
-          <h3 id="resultsCount" class="text-sm font-black text-gray-400 uppercase tracking-[0.2em]">Ready for Search</h3>
+      <div class="p-6 md:p-16 max-w-4xl mx-auto w-full">
+        <div class="text-center mb-12">
+          <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-4">Search All Reports</h1>
+          <p class="text-gray-500">Global Medical Network Connection</p>
         </div>
-        <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-      </div>
-    </div>
-  </main>
 
-  <div id="authModal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl p-10 w-full max-w-md shadow-2xl">
-      <h3 class="font-black text-3xl mb-8 text-gray-900">Doctor Access</h3>
-      <input type="text" id="regName" placeholder="Full Name (e.g. Dr. Ahmed)" class="w-full p-5 bg-gray-50 border rounded-2xl mb-6 outline-none font-bold">
+        <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-gray-100 space-y-4 mb-12">
+          <div class="relative">
+            <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="searchInput" placeholder="Search by cancer, doctor, or keyword..." 
+                   class="w-full pl-14 pr-6 py-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-blue-500 focus:bg-white outline-none transition text-lg">
+          </div>
+          <button onclick="fetchReports()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl shadow-xl active:scale-95 text-xl uppercase tracking-tighter">
+            Search Now (GO)
+          </button>
+        </div>
+
+        <div class="space-y-6">
+          <h3 id="resultsCount" class="text-sm font-black text-gray-400 uppercase tracking-widest">Global Directory</h3>
+          <div id="reportsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="authModal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+      <h3 class="font-black text-2xl mb-6">Doctor Access</h3>
+      <input type="text" id="regName" placeholder="Full Name" class="w-full p-5 bg-gray-50 border rounded-2xl mb-6 outline-none font-bold">
       <button onclick="register()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl">ENTER HUB</button>
       <button onclick="toggleAuthModal()" class="w-full mt-4 text-gray-400 font-bold">CANCEL</button>
     </div>
   </div>
 
-  <div id="uploadModal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl p-10 w-full max-w-lg shadow-2xl">
-      <h3 class="font-black text-3xl mb-8 text-emerald-900">Publish Report</h3>
+  <div id="uploadModal" class="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl">
+      <h3 class="font-black text-2xl mb-6 text-emerald-900">Publish Report</h3>
       <input type="text" id="reportTitle" placeholder="Report Title" class="w-full p-5 bg-gray-50 border rounded-2xl mb-4 font-bold outline-none">
       <input type="url" id="driveUrl" placeholder="Google Drive URL" class="w-full p-5 bg-gray-50 border rounded-2xl mb-6 font-bold outline-none">
       <button onclick="saveToCloud()" class="w-full bg-emerald-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl">CONFIRM PUBLICATION</button>
@@ -126,7 +148,6 @@
   </div>
 
   <script>
-    // --- INTEGRATED SUPABASE SETUP ---
     const SUPABASE_URL = 'https://qkvzkqodunfohpgmjglu.supabase.co'; 
     const SUPABASE_KEY = 'sb_publishable_EsxuW-76Zk9llKyt7627iQ_qOJKMeJl'; 
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -144,21 +165,26 @@
 
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
     }
 
     async function fetchReports() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       const countLabel = document.getElementById('resultsCount');
-      countLabel.innerText = "Syncing...";
+      countLabel.innerText = "Syncing Cloud...";
 
       let { data, error } = await supabaseClient.from('reports').select('*').order('created_at', { ascending: false });
-
       if (error) return console.error(error);
 
       if (query) {
         data = data.filter(r => r.title.toLowerCase().includes(query) || r.doctor_name.toLowerCase().includes(query));
       }
       render(data || []);
+      // Close sidebar on mobile after search
+      if(window.innerWidth < 768) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+      }
     }
 
     async function saveToCloud() {
@@ -180,14 +206,14 @@
       const grid = document.getElementById('reportsGrid');
       document.getElementById('resultsCount').innerText = `${data.length} GLOBAL REPORTS FOUND`;
       grid.innerHTML = data.map(r => `
-        <div class="bg-white border-2 border-gray-50 p-8 rounded-[2rem] shadow-sm hover:shadow-xl transition-all group">
-          <h3 class="text-2xl font-black text-gray-900 group-hover:text-blue-700 transition-colors mb-2">${r.title}</h3>
-          <p class="text-sm font-bold text-gray-400 italic mb-6">Dr. ${r.doctor_name}</p>
-          <a href="${r.drive_url}" target="_blank" class="flex items-center justify-center gap-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-800 transition-all">
-            VIEW DOCUMENT
+        <div class="bg-white border-2 border-gray-50 p-6 rounded-[2rem] shadow-sm hover:shadow-xl transition-all">
+          <h3 class="text-xl font-black text-gray-900 mb-2">${r.title}</h3>
+          <p class="text-xs font-bold text-gray-400 italic mb-6">Dr. ${r.doctor_name}</p>
+          <a href="${r.drive_url}" target="_blank" class="flex items-center justify-center gap-2 bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-800 transition shadow-md">
+            VIEW REPORT
           </a>
         </div>
-      `).join('') || '<div class="col-span-full text-center py-20 text-gray-400 font-bold">NO RESULTS FOUND</div>';
+      `).join('') || '<div class="col-span-full text-center py-20 text-gray-400 font-bold">NO RESULTS</div>';
     }
 
     function register() {
